@@ -1,0 +1,2294 @@
+{
+  "catalog_version": "2.3.0",
+  "source_url": "https://x.com/mardehaym/status/2110705357492203564",
+  "source_bullet_count": 160,
+  "wording": "Original paraphrase. POST ids follow the order of the source list; text is not the source text.",
+  "refs_source": "OWASP ASVS 5.0.0 (github.com/OWASP/ASVS/tree/v5.0.0), checked 2026-10-16. \"V8.4\" names a section or chapter; \"8.2.1\" names one requirement.",
+  "trigger_vocabulary": {
+    "always": "Applies to every code-changing slice.",
+    "dependencies": "Adds, updates or vets libraries, starters, vendors or managed services.",
+    "accounts": "Sign-in, sessions, passwords, recovery or user roles.",
+    "multitenant": "More than one user, company or organization whose data must stay separate.",
+    "enterprise": "Contract, procurement or security-review requirements from larger buyers.",
+    "database": "Persistent data, schema, migrations or data lifecycle.",
+    "payments": "Charges, subscriptions, invoices, tax, refunds or usage billing.",
+    "uploads": "User-supplied files or imports.",
+    "ai": "Model calls, agents, prompts, tools or AI-generated actions.",
+    "jobs": "Background, scheduled, retried or queued work.",
+    "regulated": "Health, financial, children or other specially regulated data.",
+    "privacy": "Personal data, retention, deletion, residency or policy promises.",
+    "children": "Product may be used by or collect data from minors.",
+    "integrations": "Third-party APIs, webhooks or OAuth connections.",
+    "public-api": "A customer-facing API or integration surface.",
+    "email": "Transactional or notification email.",
+    "frontend": "User interface, forms, localization or accessibility.",
+    "deploy": "Shipping, hosting, environments, pipelines or configuration.",
+    "ops": "Running a live service: monitoring, incidents, cost, recovery.",
+    "scale": "Meaningful traffic, data volume or latency pressure.",
+    "team": "Maintainability, onboarding, ownership and collaboration.",
+    "org": "Several people run or support the product, or customers and contracts expect formal operations (on-call, status page, staff tools).",
+    "distribution": "App stores, offline sync, device permissions or hardware."
+  },
+  "controls": [
+    {
+      "id": "POST-001",
+      "concern": "Data model designed deliberately up front, not accreted table by table by an AI.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-002",
+      "concern": "Sign-in works with unusual but valid email forms such as plus-addressing.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "accounts"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-003",
+      "concern": "Password-reset links are single-use and expire.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "accounts"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V6"
+      ]
+    },
+    {
+      "id": "POST-004",
+      "concern": "Multi-factor authentication with a recovery route for users who lose their device.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "accounts"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-005",
+      "concern": "Sessions expire, and all sessions for one account can be revoked.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "accounts"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V7"
+      ]
+    },
+    {
+      "id": "POST-006",
+      "concern": "Single sign-on for customers whose contracts require it.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "enterprise"
+      ],
+      "notes": [
+        "N-SSO"
+      ]
+    },
+    {
+      "id": "POST-007",
+      "concern": "SAML support where a customer actually requires that protocol.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "enterprise"
+      ],
+      "notes": [
+        "N-SSO"
+      ]
+    },
+    {
+      "id": "POST-008",
+      "concern": "SCIM provisioning so offboarding in a customer directory removes access promptly.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "enterprise"
+      ],
+      "notes": [
+        "N-SSO"
+      ]
+    },
+    {
+      "id": "POST-009",
+      "concern": "Role and permission model richer than admin versus everyone else.",
+      "source": "post",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "accounts"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 8.2.1"
+      ]
+    },
+    {
+      "id": "POST-010",
+      "concern": "Object-level checks so one user cannot read another user's records by editing an identifier.",
+      "source": "post",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "multitenant",
+        "accounts"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 8.2.2"
+      ]
+    },
+    {
+      "id": "POST-011",
+      "concern": "Tenant isolation so one customer's data never appears for another.",
+      "source": "post",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "multitenant"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 8.4.1"
+      ]
+    },
+    {
+      "id": "POST-012",
+      "concern": "Support impersonation, only if needed, with an audit record of every use.",
+      "source": "post",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "multitenant",
+        "ops"
+      ],
+      "notes": [
+        "N-SUPPORT-ACCESS"
+      ],
+      "refs": [
+        "ASVS 5.0 V8.4",
+        "ASVS 5.0 V16"
+      ]
+    },
+    {
+      "id": "POST-013",
+      "concern": "Rate limiting on sign-in to resist large-scale password guessing.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "accounts"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-014",
+      "concern": "Lockout rules that slow attackers without stranding legitimate users.",
+      "source": "post",
+      "kind": "control",
+      "domain": "auth",
+      "triggers": [
+        "accounts"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-015",
+      "concern": "Schema migrations that apply cleanly and have a tested recovery path.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database"
+      ],
+      "notes": [
+        "N-MIGRATION"
+      ]
+    },
+    {
+      "id": "POST-016",
+      "concern": "Migrations that avoid long locks on busy tables.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "scale"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-017",
+      "concern": "Indexes chosen so queries stay fast at realistic data volumes.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "scale"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-018",
+      "concern": "Connection pooling so traffic spikes do not exhaust the database.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "scale"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-019",
+      "concern": "Regular automated backups.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "ops"
+      ],
+      "notes": [
+        "N-MANAGED"
+      ]
+    },
+    {
+      "id": "POST-020",
+      "concern": "Backups proven by an actual restore test, not just a configured schedule.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "ops"
+      ],
+      "notes": [
+        "N-MANAGED"
+      ]
+    },
+    {
+      "id": "POST-021",
+      "concern": "Point-in-time recovery for accidental mass deletes or updates.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "ops"
+      ],
+      "notes": [
+        "N-MANAGED"
+      ]
+    },
+    {
+      "id": "POST-022",
+      "concern": "Recoverable deletion so an accidental removal is a support request, not an incident.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "privacy"
+      ],
+      "notes": [
+        "N-DELETION"
+      ]
+    },
+    {
+      "id": "POST-023",
+      "concern": "Validation enforced on the server, not only in the form.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "always"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V2"
+      ]
+    },
+    {
+      "id": "POST-024",
+      "concern": "Times stored and displayed correctly across time zones.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "frontend"
+      ],
+      "notes": [
+        "N-TIME"
+      ]
+    },
+    {
+      "id": "POST-025",
+      "concern": "Names with apostrophes and other punctuation work end to end.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-026",
+      "concern": "Emoji, accented characters and right-to-left text work in every input.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "frontend",
+        "database"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-027",
+      "concern": "Money held in exact units, never binary floating point.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments"
+      ],
+      "notes": [
+        "N-MONEY"
+      ]
+    },
+    {
+      "id": "POST-028",
+      "concern": "Currency, rounding and tax rules for each market sold into.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments"
+      ],
+      "notes": [
+        "N-MONEY"
+      ]
+    },
+    {
+      "id": "POST-029",
+      "concern": "Data model that tolerates a customer's changing requirements.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-030",
+      "concern": "Idempotency keys so a retried payment cannot charge twice.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments",
+        "jobs"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-031",
+      "concern": "Protection against duplicate submissions from repeated clicks.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "frontend",
+        "database"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-032",
+      "concern": "Pagination that still works on very deep pages.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "scale"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-033",
+      "concern": "Data export for customers who ask for their records.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "privacy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-034",
+      "concern": "Imports tolerate messy or legacy-format files.",
+      "source": "post",
+      "kind": "control",
+      "domain": "data",
+      "triggers": [
+        "database",
+        "uploads"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-035",
+      "concern": "Retention rules, with code that deletes what contracts and policy promise.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "privacy",
+        "enterprise"
+      ],
+      "notes": [
+        "N-DELETION"
+      ]
+    },
+    {
+      "id": "POST-036",
+      "concern": "Secrets kept out of code, repositories and AI chat history.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "always"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-037",
+      "concern": "Rotate any key an AI tool previously placed in configuration or chat.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-038",
+      "concern": "Every installed package confirmed to exist and be the one intended.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "dependencies"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-039",
+      "concern": "Dependency vulnerability scanning, with review of newly added libraries.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "dependencies"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-040",
+      "concern": "Untrusted input handled safely wherever users can type or paste content.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "frontend",
+        "database"
+      ],
+      "notes": [
+        "N-INJECTION"
+      ]
+    },
+    {
+      "id": "POST-041",
+      "concern": "Protection against injection, cross-site scripting, cross-site request forgery and other common web weaknesses.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "always"
+      ],
+      "notes": [
+        "N-INJECTION",
+        "N-CORS"
+      ],
+      "refs": [
+        "ASVS 5.0 V1",
+        "ASVS 5.0 V3"
+      ]
+    },
+    {
+      "id": "POST-042",
+      "concern": "Uploaded files checked, size-limited and stored where they cannot execute.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "uploads"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V5.2",
+        "ASVS 5.0 V5.3"
+      ]
+    },
+    {
+      "id": "POST-043",
+      "concern": "Cross-origin rules configured narrowly instead of open to everyone.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "frontend",
+        "public-api"
+      ],
+      "notes": [
+        "N-CORS"
+      ]
+    },
+    {
+      "id": "POST-044",
+      "concern": "Security headers on responses.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "frontend",
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-045",
+      "concern": "Encryption in transit and at rest.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "database",
+        "deploy"
+      ],
+      "notes": [
+        "N-MANAGED"
+      ]
+    },
+    {
+      "id": "POST-046",
+      "concern": "Least-privilege access for people and AI agents, especially any holding production credentials.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "deploy",
+        "ai"
+      ],
+      "notes": [
+        "N-MANAGED"
+      ]
+    },
+    {
+      "id": "POST-047",
+      "concern": "Activity logs attributing actions to people while excluding credentials, tokens and card data.",
+      "source": "post",
+      "kind": "control",
+      "domain": "observability",
+      "triggers": [
+        "ops",
+        "privacy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-048",
+      "concern": "Independent penetration test before an enterprise buyer runs their own.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-049",
+      "concern": "Evidence-backed answers to buyers' security questionnaires.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-050",
+      "concern": "A process for receiving and handling outside vulnerability reports.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-051",
+      "concern": "Response plan for a lost or stolen device that has production access.",
+      "source": "post",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "ops",
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-052",
+      "concern": "SOC 2 treated as a scoped audit program with policies and evidence, not a checklist.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "enterprise",
+        "regulated"
+      ],
+      "notes": [
+        "N-SOC2"
+      ]
+    },
+    {
+      "id": "POST-053",
+      "concern": "HIPAA applicability assessed as soon as patient-related records may be handled.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "regulated"
+      ],
+      "notes": [
+        "N-HIPAA"
+      ]
+    },
+    {
+      "id": "POST-054",
+      "concern": "Business associate agreements with vendors, including model providers, where HIPAA applies.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "regulated",
+        "ai"
+      ],
+      "notes": [
+        "N-HIPAA",
+        "N-PROMPT-DATA"
+      ]
+    },
+    {
+      "id": "POST-055",
+      "concern": "Audit trails showing who viewed a record, not only who changed it.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "regulated",
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-056",
+      "concern": "Card-data scope understood and raw card numbers kept out of your database.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-057",
+      "concern": "Privacy-rights deletion requests handled across data stores, logs and backups per a stated policy.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "privacy"
+      ],
+      "notes": [
+        "N-DELETION",
+        "N-PRIVACY-LAW"
+      ]
+    },
+    {
+      "id": "POST-058",
+      "concern": "Data residency honored where a contract restricts location.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "enterprise",
+        "privacy"
+      ],
+      "notes": [
+        "N-PRIVACY-LAW"
+      ]
+    },
+    {
+      "id": "POST-059",
+      "concern": "Periodic access reviews with named sign-off.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "enterprise",
+        "org"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-060",
+      "concern": "Development, staging and production kept consistent with each other.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-061",
+      "concern": "Infrastructure defined as code rather than in one person's memory.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-062",
+      "concern": "Deploy pipeline runs tests before anything reaches customers.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-063",
+      "concern": "Fast rollback or roll-forward after a bad release.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy"
+      ],
+      "notes": [
+        "N-MIGRATION"
+      ]
+    },
+    {
+      "id": "POST-064",
+      "concern": "Deploys that do not cause customer-visible downtime.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy",
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-065",
+      "concern": "Feature flags to separate shipping code from releasing a feature.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-066",
+      "concern": "Autoscaling for predictable load spikes.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "scale",
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-067",
+      "concern": "Content delivery network so distant users get fast loads.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "scale",
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-068",
+      "concern": "DNS and certificates renewed well before expiry.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy",
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-069",
+      "concern": "Background queues so slow work does not block the interface.",
+      "source": "post",
+      "kind": "control",
+      "domain": "jobs",
+      "triggers": [
+        "jobs"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-070",
+      "concern": "Retries with backoff so a transient failure does not lose work.",
+      "source": "post",
+      "kind": "control",
+      "domain": "jobs",
+      "triggers": [
+        "jobs",
+        "integrations"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-071",
+      "concern": "Dead-letter handling for jobs that exhaust their retries.",
+      "source": "post",
+      "kind": "control",
+      "domain": "jobs",
+      "triggers": [
+        "jobs"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-072",
+      "concern": "Scheduled jobs that do not run twice when another server is added.",
+      "source": "post",
+      "kind": "control",
+      "domain": "jobs",
+      "triggers": [
+        "jobs"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-073",
+      "concern": "Caching with correct invalidation when data changes.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "scale",
+        "database"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-074",
+      "concern": "SPF, DKIM and DMARC so transactional mail is not filed as spam.",
+      "source": "post",
+      "kind": "control",
+      "domain": "email",
+      "triggers": [
+        "email"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-075",
+      "concern": "Bounce and complaint handling for transactional email.",
+      "source": "post",
+      "kind": "control",
+      "domain": "email",
+      "triggers": [
+        "email"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-076",
+      "concern": "Storage lifecycle rules so stale files stop accruing cost.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-077",
+      "concern": "Cost alerts that surface runaway spend the same day.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ops",
+      "triggers": [
+        "ops",
+        "ai"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-078",
+      "concern": "Written disaster-recovery plan, exercised periodically.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ops",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-079",
+      "concern": "Second region only if a contractual uptime promise requires it.",
+      "source": "post",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-080",
+      "concern": "Structured logs that can be searched during an incident.",
+      "source": "post",
+      "kind": "control",
+      "domain": "observability",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-081",
+      "concern": "Error tracking that groups repeats of the same defect.",
+      "source": "post",
+      "kind": "control",
+      "domain": "observability",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-082",
+      "concern": "Uptime checks that run from outside your own network.",
+      "source": "post",
+      "kind": "control",
+      "domain": "observability",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-083",
+      "concern": "Alerts that page a human and are tuned to avoid noise.",
+      "source": "post",
+      "kind": "control",
+      "domain": "observability",
+      "triggers": [
+        "ops"
+      ],
+      "notes": [
+        "N-INCIDENT"
+      ]
+    },
+    {
+      "id": "POST-084",
+      "concern": "Operational dashboards covering response time, failure rate and request volume.",
+      "source": "post",
+      "kind": "control",
+      "domain": "observability",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-085",
+      "concern": "Tracing a slow request across every service it touches.",
+      "source": "post",
+      "kind": "control",
+      "domain": "observability",
+      "triggers": [
+        "scale",
+        "org"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-086",
+      "concern": "An on-call arrangement with a named person who responds.",
+      "source": "post",
+      "kind": "control",
+      "domain": "org",
+      "triggers": [
+        "org"
+      ],
+      "notes": [
+        "N-INCIDENT"
+      ]
+    },
+    {
+      "id": "POST-087",
+      "concern": "Runbooks explaining what each alert condition means and what to do.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ops",
+      "triggers": [
+        "ops"
+      ],
+      "notes": [
+        "N-INCIDENT"
+      ]
+    },
+    {
+      "id": "POST-088",
+      "concern": "Postmortems that lead to changes.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ops",
+      "triggers": [
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-089",
+      "concern": "Customer-facing status page.",
+      "source": "post",
+      "kind": "control",
+      "domain": "org",
+      "triggers": [
+        "org"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-090",
+      "concern": "Unit tests derived from the stated intended behavior, each shown to fail when that behavior breaks.",
+      "source": "post",
+      "kind": "control",
+      "domain": "testing",
+      "triggers": [
+        "always"
+      ],
+      "notes": [
+        "N-SOLO-REVIEW"
+      ]
+    },
+    {
+      "id": "POST-091",
+      "concern": "Integration tests for each third-party API relied on.",
+      "source": "post",
+      "kind": "control",
+      "domain": "testing",
+      "triggers": [
+        "integrations"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-092",
+      "concern": "Full-journey tests covering signup, checkout and the other flows the business depends on for revenue.",
+      "source": "post",
+      "kind": "control",
+      "domain": "testing",
+      "triggers": [
+        "frontend",
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-093",
+      "concern": "Load testing before launch, against an approved non-production target.",
+      "source": "post",
+      "kind": "control",
+      "domain": "testing",
+      "triggers": [
+        "scale",
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-094",
+      "concern": "Realistic test data that is not real production data.",
+      "source": "post",
+      "kind": "control",
+      "domain": "testing",
+      "triggers": [
+        "database",
+        "privacy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-095",
+      "concern": "Regression tests so fixing one bug does not revive an old one.",
+      "source": "post",
+      "kind": "control",
+      "domain": "testing",
+      "triggers": [
+        "always"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-096",
+      "concern": "Testing on the older hardware and browsers key customers actually use.",
+      "source": "post",
+      "kind": "control",
+      "domain": "testing",
+      "triggers": [
+        "frontend",
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-097",
+      "concern": "Accessibility conformance where a contract or law requires it.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend",
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-098",
+      "concern": "Subscriptions, plan changes and proration.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-099",
+      "concern": "Failed-payment retries and dunning communication.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-100",
+      "concern": "Invoices carrying buyer reference numbers such as purchase-order numbers.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments",
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-101",
+      "concern": "Sales tax and VAT handling.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments"
+      ],
+      "notes": [
+        "N-MONEY"
+      ]
+    },
+    {
+      "id": "POST-102",
+      "concern": "Refund, credit and partial-refund handling.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-103",
+      "concern": "Usage metering that reconciles exactly with billed amounts.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments",
+        "ai"
+      ],
+      "notes": [
+        "N-MONEY"
+      ]
+    },
+    {
+      "id": "POST-104",
+      "concern": "Billing logic that can accommodate custom annual contract terms.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments",
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-105",
+      "concern": "Revenue reports finance can reconcile.",
+      "source": "post",
+      "kind": "control",
+      "domain": "billing",
+      "triggers": [
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-106",
+      "concern": "Inbound webhooks verify signatures.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "integrations",
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-107",
+      "concern": "Outbound webhooks retry and keep a record of failed deliveries.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "integrations",
+        "public-api"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-108",
+      "concern": "Versioned API so changes do not break customer integrations.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "public-api"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-109",
+      "concern": "Customer-managed API keys that can be issued and revoked.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "public-api"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-110",
+      "concern": "API rate limits that protect the service without blocking legitimate integrations.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "public-api"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-111",
+      "concern": "A plan for when a third-party API changes its responses unannounced.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "integrations"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-112",
+      "concern": "OAuth token refresh handled before and after expiry.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "integrations",
+        "accounts"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-113",
+      "concern": "Sandbox where customers can test their integration.",
+      "source": "post",
+      "kind": "control",
+      "domain": "api",
+      "triggers": [
+        "public-api"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-114",
+      "concern": "Prompt-injection defenses for every input that can reach a model.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai"
+      ],
+      "notes": [
+        "N-PROMPT-INJECTION"
+      ]
+    },
+    {
+      "id": "POST-115",
+      "concern": "Sensitive data kept out of prompts unless sent to an approved, properly configured processor.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai",
+        "privacy",
+        "regulated"
+      ],
+      "notes": [
+        "N-PROMPT-DATA"
+      ]
+    },
+    {
+      "id": "POST-116",
+      "concern": "Per-customer model spend caps.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai",
+        "payments"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-117",
+      "concern": "Evaluations that reveal when a model update degrades answers.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-118",
+      "concern": "Fallback behavior for a model-provider outage.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-119",
+      "concern": "Migration plan for when a model is deprecated.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-120",
+      "concern": "Prompt and output logs for debugging, excluding anything not permitted to be kept.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai",
+        "privacy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-121",
+      "concern": "Human approval before any irreversible action the AI takes.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ai",
+      "triggers": [
+        "ai"
+      ],
+      "notes": [
+        "N-PROMPT-INJECTION"
+      ]
+    },
+    {
+      "id": "POST-122",
+      "concern": "Pages that load acceptably on slow networks.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-123",
+      "concern": "Empty, loading and error states on every screen.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-124",
+      "concern": "Error messages a customer can act on.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-125",
+      "concern": "Forms keep what people typed when validation fails.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-126",
+      "concern": "Emails render correctly in the mail clients your customers use.",
+      "source": "post",
+      "kind": "control",
+      "domain": "email",
+      "triggers": [
+        "email"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-127",
+      "concern": "Notifications users can turn off.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "email",
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-128",
+      "concern": "Undo where it is practical.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-129",
+      "concern": "Keyboard navigation and screen-reader support.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-130",
+      "concern": "Translations with locale-appropriate dates and numbers.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-131",
+      "concern": "Back-button behavior that matches expectations.",
+      "source": "post",
+      "kind": "control",
+      "domain": "ux",
+      "triggers": [
+        "frontend"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-132",
+      "concern": "Code a maintainer can read and follow.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "always"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-133",
+      "concern": "Every change reviewed against its diff before release, with the reviewer recorded; a self-review is labeled as one.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "always"
+      ],
+      "notes": [
+        "N-SOLO-REVIEW"
+      ]
+    },
+    {
+      "id": "POST-134",
+      "concern": "Branching strategy that lets several people work without overwriting each other.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-135",
+      "concern": "Regular dependency upgrades so the project never falls far behind.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "dependencies",
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-136",
+      "concern": "Framework upgrades before the old version loses security support.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "team",
+        "ops"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-137",
+      "concern": "Dead code left behind by earlier attempts removed.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-138",
+      "concern": "Overgrown files split into coherent modules.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-139",
+      "concern": "Architecture decisions written down with reasons.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-140",
+      "concern": "README that gets a new developer running locally quickly.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-141",
+      "concern": "Documentation for whoever inherits the project.",
+      "source": "post",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-142",
+      "concern": "Admin panel for the operations team.",
+      "source": "post",
+      "kind": "control",
+      "domain": "business",
+      "triggers": [
+        "enterprise",
+        "org"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-143",
+      "concern": "Internal tools that let customer-facing staff resolve questions without involving engineers.",
+      "source": "post",
+      "kind": "control",
+      "domain": "business",
+      "triggers": [
+        "org"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-144",
+      "concern": "Changelog customers can read.",
+      "source": "post",
+      "kind": "control",
+      "domain": "business",
+      "triggers": [
+        "org"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-145",
+      "concern": "Terms and privacy policy that match what the code actually does.",
+      "source": "post",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "privacy"
+      ],
+      "notes": [
+        "N-PRIVACY-LAW"
+      ]
+    },
+    {
+      "id": "POST-146",
+      "concern": "Accounts, domains and repositories owned by the organization, not an individual builder.",
+      "source": "post",
+      "kind": "control",
+      "domain": "business",
+      "triggers": [
+        "ops",
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-147",
+      "concern": "More than one person able to maintain the system.",
+      "source": "post",
+      "kind": "control",
+      "domain": "business",
+      "triggers": [
+        "team"
+      ],
+      "notes": []
+    },
+    {
+      "id": "POST-148",
+      "concern": "Lane: a senior engineer reads all AI-written code before it ships.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-132",
+        "POST-133"
+      ]
+    },
+    {
+      "id": "POST-149",
+      "concern": "Lane: a backend engineer designs the data model before growth exposes its flaws.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-001",
+        "POST-029"
+      ]
+    },
+    {
+      "id": "POST-150",
+      "concern": "Lane: a senior engineer can explain why a fix introduced new defects.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-095",
+        "POST-133"
+      ]
+    },
+    {
+      "id": "POST-151",
+      "concern": "Lane: an operations owner for deploys, rollback, servers and cloud spend.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-062",
+        "POST-063",
+        "POST-077"
+      ]
+    },
+    {
+      "id": "POST-152",
+      "concern": "Lane: a named person answers production alerts such as a payment outage.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-086",
+        "POST-087"
+      ]
+    },
+    {
+      "id": "POST-153",
+      "concern": "Lane: security patches framework vulnerabilities quickly after disclosure.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-039",
+        "POST-135",
+        "POST-136"
+      ]
+    },
+    {
+      "id": "POST-154",
+      "concern": "Lane: security/compliance can walk an auditor through how sensitive data moves.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-052",
+        "POST-053",
+        "POST-055"
+      ]
+    },
+    {
+      "id": "POST-155",
+      "concern": "Lane: QA independently verifies what the AI claims it tested.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-090",
+        "POST-092"
+      ]
+    },
+    {
+      "id": "POST-156",
+      "concern": "Lane: a backend owner runs live migrations without losing data.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-015",
+        "POST-016"
+      ]
+    },
+    {
+      "id": "POST-157",
+      "concern": "Lane: a tech lead declines features that destabilize others.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-139"
+      ]
+    },
+    {
+      "id": "POST-158",
+      "concern": "Lane: an architect makes it work for all customers at once, not one laptop.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-011",
+        "POST-066"
+      ]
+    },
+    {
+      "id": "POST-159",
+      "concern": "Lane: a senior engineer can debug when the AI that wrote the code cannot.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-132"
+      ]
+    },
+    {
+      "id": "POST-160",
+      "concern": "Lane: someone preserves the reasons the system is built this way.",
+      "source": "post",
+      "kind": "responsibility",
+      "domain": "team",
+      "triggers": [
+        "team"
+      ],
+      "notes": [],
+      "maps_to": [
+        "POST-139",
+        "POST-141"
+      ]
+    },
+    {
+      "id": "EXT-001",
+      "concern": "Write a scoped threat model, trust boundaries, abuse cases and accountable risk decisions.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "accounts",
+        "multitenant",
+        "payments",
+        "uploads",
+        "ai",
+        "integrations"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-002",
+      "concern": "Test race conditions and atomicity for inventory, permissions, quotas and payments.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "payments",
+        "multitenant",
+        "database",
+        "jobs"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-003",
+      "concern": "Handle SSRF and network egress restrictions for URL fetchers, webhooks and AI tools.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "integrations",
+        "ai",
+        "public-api"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-004",
+      "concern": "Protect software supply chains with provenance checks, pinned dependencies and reviewed install scripts.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "dependencies"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-005",
+      "concern": "Confirm open-source licenses, attribution and commercial obligations before reuse.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "dependencies"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-006",
+      "concern": "Define measurable service objectives, recovery point and recovery time objectives, then rehearse them.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "ops",
+      "triggers": [
+        "ops",
+        "enterprise"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-007",
+      "concern": "Check preview deployments and staging for unintended public exposure and production credentials.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "deploy"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-008",
+      "concern": "Model consent, data minimization, lawful processing and children-related restrictions where applicable.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "compliance",
+      "triggers": [
+        "privacy",
+        "children",
+        "regulated"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-009",
+      "concern": "Define per-environment configuration validation and safe failure on missing critical settings.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "always"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-010",
+      "concern": "Exercise graceful degradation, timeouts, cancellation and circuit breaking for unavailable dependencies.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "infra",
+      "triggers": [
+        "integrations",
+        "ai",
+        "jobs"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-011",
+      "concern": "Document upstream update strategy and exit/export paths for managed services and starter forks.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "maintainability",
+      "triggers": [
+        "dependencies"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-012",
+      "concern": "Validate distribution-specific requirements such as app-store permissions, offline sync or hardware safety when applicable.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "ops",
+      "triggers": [
+        "distribution"
+      ],
+      "notes": []
+    },
+    {
+      "id": "EXT-013",
+      "concern": "Restrict field-level reads and writes by permission so clients cannot set or see fields they do not own (mass assignment).",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "accounts",
+        "multitenant",
+        "public-api"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 8.2.3",
+        "ASVS 5.0 15.3.3"
+      ]
+    },
+    {
+      "id": "EXT-014",
+      "concern": "Enforce authorization on the server for every request, deny by default, including exports, background jobs and admin routes.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "accounts",
+        "multitenant"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 8.2.1",
+        "ASVS 5.0 V8.3"
+      ]
+    },
+    {
+      "id": "EXT-015",
+      "concern": "Take the tenant from the authenticated session, never from client input, and scope every query, cache, search index, file path and export by it.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "multitenant"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 8.4.1"
+      ]
+    },
+    {
+      "id": "EXT-016",
+      "concern": "Gate admin and support functions behind a separate permission and recent re-authentication, and audit each use.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "accounts",
+        "multitenant"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V8.4",
+        "ASVS 5.0 7.5.3",
+        "ASVS 5.0 V16"
+      ]
+    },
+    {
+      "id": "EXT-017",
+      "concern": "Write the authorization rules per role and resource and test them as a permission matrix with negative cases.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "authz",
+      "triggers": [
+        "accounts",
+        "multitenant"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 8.1.1"
+      ]
+    },
+    {
+      "id": "EXT-018",
+      "concern": "Accept uploads only by content inspection plus extension, with per-file size and per-user count limits.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "uploads"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V5.2"
+      ]
+    },
+    {
+      "id": "EXT-019",
+      "concern": "Store uploads under server-generated names outside the web root; never use a user-supplied file name as a path.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "uploads"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V5.3"
+      ]
+    },
+    {
+      "id": "EXT-020",
+      "concern": "Serve downloads with a safe content type, attachment disposition and nosniff, through links scoped to the owner that expire.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "uploads"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V5.4",
+        "ASVS 5.0 3.2.1",
+        "ASVS 5.0 3.4.4",
+        "ASVS 5.0 8.2.2"
+      ]
+    },
+    {
+      "id": "EXT-021",
+      "concern": "Bound archive and image processing against decompression bombs and parser exploits, and isolate that processing.",
+      "source": "engineering supplement",
+      "kind": "control",
+      "domain": "security",
+      "triggers": [
+        "uploads"
+      ],
+      "notes": [],
+      "refs": [
+        "ASVS 5.0 V5.2"
+      ]
+    }
+  ]
+}
