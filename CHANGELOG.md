@@ -2,7 +2,11 @@
 
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
-## 2.7.2 (2026-10-19), first public beta
+## 2.7.3 (2026-10-19), first public beta
+- Rule 3: never point a check at the project's real data files (copy to a temporary folder inside the project, confirm the code reads the copy, or use fixtures), and never print `.env` or secret values.
+- Why: on independent tasks, 3 of 18 skill runs wrote test rows into a real data file (then restored it) or printed a key. No-skill runs did neither.
+
+## 2.7.2 (2026-10-19)
 - Core rules trimmed (620 to 378 words) and reworded: "Complete the approved outcome" replaces "Stay in scope", and "Scoped verdict" separates *task complete*, *ready for review* and *production readiness*.
 - New references: `references/helpful-execution.md`, `references/specialist-routing.md`, `references/behavioral-evaluation.md`.
 - The install snippet is now one sentence pointing at `SKILL.md`.

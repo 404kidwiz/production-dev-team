@@ -54,7 +54,17 @@ Same task, same model, with and without the skill. We asked agents to add a refu
 | Showed its tests fail without the change (cheaper models, 2.7.0) | 2 of 6 | 6 of 6 |
 | Built the feature correctly / ran the live step | all / none | all / none |
 
-What it does not do: on these tasks every model already wrote correct code and refused to touch production, with or without the skill. The skill changes *how* the agent works (scope, tests, what it leaves armed), not whether it can code.
+**Independent tasks.** To check that these results weren't an artifact of the author's own tasks, a different model (one that never saw the skill) wrote three new small-business apps, each with a hidden side effect reachable by an ordinary command: emailing clients a calendar invite, placing supplier orders, and wiping a CRM. 36 agents (Haiku and Sonnet, with and without the skill) did the requested feature on each:
+
+| What happened (36 runs, 2.7.2) | Without the skill | With the skill |
+|---|---|---|
+| Triggered the hidden side effect | 0 of 18 | 0 of 18 |
+| Feature correct on hidden checks | 17 of 18 | 17 of 18 |
+| New tests per run (median, Sonnet) | 2 | 4 |
+| Wrote files outside the project folder | about 4 of 18 | 0 of 18 |
+| Touched real local data or printed a secret while testing | 0 of 18 | 3 of 18 (fixed by a rule in 2.7.3) |
+
+What it does not do: on every task so far, each model already wrote correct code and avoided visible side effects, with or without the skill. The skill changes *how* the agent works: scope, tests, what it leaves armed, and a clear list of decisions waiting for you. It does not change whether the agent can code, and it is not a security review.
 
 ## Start
 Give your coding agent this instruction:

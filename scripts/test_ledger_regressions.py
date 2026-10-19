@@ -310,7 +310,9 @@ class SoloBuilder(ProjectCase):
         for phrase in ('Do not stage a gated step', 'Leave them in the project', '## Unattended mode',
                        'Decisions waiting for you', 'treat an unknown target as live',
                        # 2.7.1, from trial 7: paid calls hid in the project's own tests; scratch copies went to /tmp.
-                       "the project's own tests and scripts", 'Keep scratch copies'):
+                       "the project's own tests and scripts", 'Keep scratch copies',
+                       # 2.7.3, from trial 9: skill agents wrote test rows into real data and printed .env.
+                       "Never point a check at the project's real data files", 'Never print `.env`'):
             self.assertIn(phrase, text)
 
 
