@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 import install_snippet
 from install_snippet import START, END
@@ -395,6 +396,14 @@ class GuardHook(InstallCase):
         self.assertIn('plugin', result.stderr)
         self.assertIn('git clone', result.stderr)
         self.assertNotIn('plugin', self.install('claude', '--hook', '--remove', '--skill-path', str(copy)).stderr)
+
+    def test_plugin_cache_under_a_custom_config_dir_gets_a_warning(self):
+        copy = self.copy_skill('cfg', 'plugins', 'cache', 'production-dev-team', 'production-dev-team', '2.10.0')
+        self.assertNotIn('plugin folder', self.install('claude', '--hook', '--skill-path', str(copy)).stderr)
+        with mock.patch.dict(os.environ, {'CLAUDE_CONFIG_DIR': str(Path(self._tmp.name) / 'cfg')}):
+            result = self.install('claude', '--hook', '--remove', '--skill-path', str(copy))
+            self.assertNotIn('plugin folder', result.stderr)
+            self.assertIn('plugin folder', self.install('claude', '--hook', '--skill-path', str(copy)).stderr)
 
     def test_claude_symlink_out_of_the_project_is_refused(self):
         outside = Path(self._tmp.name) / 'outside'

@@ -159,6 +159,13 @@ def render_hook(existing, entry, remove):
     return json.dumps(data, indent=2) + '\n'
 
 
+def in_plugin_cache(skill):
+    caches = [PLUGIN_CACHE]
+    if os.environ.get('CLAUDE_CONFIG_DIR'):  # Claude Code keeps plugins under its config dir, ~/.claude by default
+        caches.append(Path(os.environ['CLAUDE_CONFIG_DIR']).expanduser().resolve().as_posix() + '/plugins/cache/')
+    return any(cache in skill.as_posix() + '/' for cache in caches)
+
+
 def read_text(path):
     with open(path, encoding='utf-8', newline='') as handle:  # newline='' keeps CRLF and CR exactly as they are
         return handle.read()
@@ -234,7 +241,7 @@ def main(argv=None):
             print(f'unchanged: {target}')
             return 0
         verb = 'removed' if result is None or args.remove else ('created' if existing is None else 'updated')
-        if not args.remove and PLUGIN_CACHE in skill.as_posix() + '/':
+        if not args.remove and in_plugin_cache(skill):
             print(f'note: {skill} is a Claude Code plugin folder, replaced on every plugin update; after one the hook '
                   'skips silently and the block points nowhere until you re-run this. For a path that stays put: '
                   'git clone https://github.com/404kidwiz/production-dev-team ~/.agents/skills/production-dev-team '

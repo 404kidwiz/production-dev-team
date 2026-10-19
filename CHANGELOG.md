@@ -2,6 +2,9 @@
 
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
+## Unreleased
+- The installer's plugin-folder warning now also covers a Claude Code config folder set with `CLAUDE_CONFIG_DIR`, not only `~/.claude`.
+
 ## 2.10.0 (2026-10-19)
 - One-command install. The repository is now a Claude Code plugin marketplace (`.claude-plugin/marketplace.json` and `plugin.json`, version pinned to `VERSION`): `claude plugin marketplace add 404kidwiz/production-dev-team`, then `claude plugin install production-dev-team@production-dev-team`. Codex and Cursor install with one `git clone` into `~/.agents/skills/production-dev-team`, which both scan. The README's new Install section covers update and uninstall for each, and replaces the old `~/.codex/skills` advice (current Codex reads `~/.agents/skills`).
 - New `scripts/doctor.py`: a read-only install self-check. It reports which agents can find this copy (Claude Code plugin, or a user or project skills folder for Claude Code, Codex or Cursor, including symlinks), warns about other copies with a different version, checks Python 3.9+, SKILL.md and that `plugin.json` matches `VERSION`, and starts the safe-run, danger-map and guard scripts with `--help`. Exit 1 only when a check fails.
