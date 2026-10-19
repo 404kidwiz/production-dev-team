@@ -2,7 +2,7 @@
 
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
-## Unreleased
+## 2.9.0 (2026-10-19)
 - New `scripts/scan_side_effects.py` (danger map): a read-only static scan that lists every script, CLI subcommand, package script and test that can message people, move money or place orders, delete or bulk-overwrite records, or call a service with a URL or key from `.env` or config, with the command to run, file:line hops and a one-line risk. Never runs project code or prints secret values. Python (call graph) first, JS/TS at file level. `SKILL.md` makes it the first step of Audit and Slice.
 - Why: every hazard in the A/B trials was visible in the code but took agents time to find. On the trial 8 and trial 4 apps it lists all six hazardous commands in under a second, and nothing else.
 - New optional `scripts/guard_hook.py`: a Claude Code `PreToolUse` hook that asks before a shell command deletes data outside temp and build folders (`rm -rf`, `find -delete`, destructive SQL through a database client), pushes or deploys, runs a migration, or runs a project script or test while `.env` sets a URL or key (names shown, never values; commands wrapped in `scripts/safe_run.py` pass). It denies instead of asking in `bypassPermissions`/`dontAsk` modes or with `--deny` (Codex, which does not support "ask"); `--off` turns one check off. Silent for everything else; a crash never blocks. Install with `install_snippet.py --host claude --project DIR --hook` (writes `.claude/settings.local.json`, keeps other settings, `--remove` undoes it).
