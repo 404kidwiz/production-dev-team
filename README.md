@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Production Dev Team: an engineering guardrail for coding agents that ship real software to real users" width="100%">
+  <img src="assets/banner.jpg" alt="Production Dev Team: a robot hand leaves a sticky note reading 'Ready. Tests pass. Needs your OK.' on the glass cover of a red Deploy to Production button. Ships the work. Leaves the big red button to you." width="100%">
 </p>
 
 <p align="center">
