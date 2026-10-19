@@ -1,0 +1,16 @@
+{
+  "name": "production-dev-team",
+  "description": "Production Dev Team: an engineering guardrail skill for coding agents.",
+  "owner": {
+    "name": "404kidwiz",
+    "url": "https://github.com/404kidwiz"
+  },
+  "plugins": [
+    {
+      "name": "production-dev-team",
+      "source": "./",
+      "description": "Engineering guardrail for coding agents shipping real software: gates live and destructive actions, leaves tests behind, never calls anything verified without a recorded check.",
+      "category": "development"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "production-dev-team",
+  "displayName": "Production Dev Team",
+  "version": "2.9.0",
+  "description": "Engineering guardrail for coding agents shipping real software: picks the lightest mode, gates live and destructive actions, leaves tests behind and never calls anything verified without a recorded check.",
+  "author": {
+    "name": "404kidwiz",
+    "url": "https://github.com/404kidwiz"
+  },
+  "homepage": "https://github.com/404kidwiz/production-dev-team",
+  "repository": "https://github.com/404kidwiz/production-dev-team",
+  "license": "MIT",
+  "keywords": ["guardrails", "safety", "testing", "code-review", "production", "vibe-coding"]
+}

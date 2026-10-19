@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-40d6e0?style=flat-square"></a>
   <img alt="Python 3.9 | 3.12 | 3.14 tested" src="https://img.shields.io/badge/python-3.9%20%7C%203.12%20%7C%203.14-3776ab?style=flat-square">
-  <img alt="Portable agent skill: copy the folder" src="https://img.shields.io/badge/portable-agent%20skill-ffb838?style=flat-square">
+  <img alt="Install: Claude Code plugin, Codex, Cursor" src="https://img.shields.io/badge/install-Claude%20Code%20%7C%20Codex%20%7C%20Cursor-ffb838?style=flat-square">
 </p>
 
 # Production Development Team
@@ -15,6 +15,8 @@ A portable agent skill for beginners building new apps or auditing and hardening
 > **Public beta.** The rules have been tested in small A/B trials (summarized below), not in large real-world use. It makes agents more careful; it does not make an app secure or compliant. Please [report anything the agent does wrong](#report-a-problem).
 
 Coding agents are fast and confident, and they will happily tell you a login system is "done" when nobody checked that user A cannot read user B's data. This skill gives your agent engineering judgment: it asks the right questions, picks vetted foundations, stops before risky actions, and refuses to call anything *verified* without a recorded check.
+
+**Install:** [two commands in Claude Code, one `git clone` for Codex and Cursor](#install).
 
 ## How it works
 
@@ -66,12 +68,42 @@ Same task, same model, with and without the skill. We asked agents to add a refu
 
 What it does not do: on every task so far, each model already wrote correct code and avoided visible side effects, with or without the skill. The skill changes *how* the agent works: scope, tests, what it leaves armed, and a clear list of decisions waiting for you. It does not change whether the agent can code, and it is not a security review.
 
+## Install
+**Claude Code** (plugin; Claude Code handles updates):
+
+```bash
+claude plugin marketplace add 404kidwiz/production-dev-team
+```
+
+```bash
+claude plugin install production-dev-team@production-dev-team
+```
+
+Inside a session the same two steps are `/plugin marketplace add 404kidwiz/production-dev-team` and `/plugin install production-dev-team@production-dev-team`. Start a new session afterwards. No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first.
+- Update: `claude plugin marketplace update production-dev-team`, then `claude plugin update production-dev-team@production-dev-team`, then restart. Or turn on auto-update for this marketplace under **Marketplaces** in `/plugin`. Installs follow the plugin version, so you get releases, not every commit.
+- Uninstall: `claude plugin uninstall production-dev-team@production-dev-team`, then `claude plugin marketplace remove production-dev-team`.
+
+**Codex and Cursor** (both read `~/.agents/skills`, so one clone serves both):
+
+```bash
+git clone https://github.com/404kidwiz/production-dev-team.git ~/.agents/skills/production-dev-team
+```
+
+- Update: `git -C ~/.agents/skills/production-dev-team pull --ff-only`. Uninstall: `rm -rf ~/.agents/skills/production-dev-team`. Restart Codex or Cursor if the skill does not show up.
+- Keep the folder name `production-dev-team` (Cursor requires it to match the skill name). For one project only, clone into that project's `.agents/skills/production-dev-team` instead.
+
+**Any other agent:** copy the whole folder into the skills directory it supports, or tell it to read this folder's `SKILL.md`. `SKILL.md` alone loses the catalog, caveats, examples and helper scripts. No MCP dependency. Python 3.9+ is needed only for the helper scripts (tested on 3.9, 3.12 and 3.14).
+
+**Check the install:** `python3 ~/.agents/skills/production-dev-team/scripts/doctor.py` (for the Claude Code plugin the folder is `~/.claude/plugins/cache/production-dev-team/production-dev-team/<version>`; `claude plugin list` shows the version). It confirms which agents can find this copy, warns about older copies elsewhere, checks Python and starts `scripts/safe_run.py`, `scripts/scan_side_effects.py` and `scripts/guard_hook.py` with `--help`. Read-only; exit 0 means every check passed.
+
+The plugin's folder changes with every update. If you use `scripts/install_snippet.py` (below), especially `--hook`, run it from the git clone, whose path stays put: a hook pointing at a deleted plugin folder fails every shell command until you re-run the installer.
+
 ## Start
 Give your coding agent this instruction:
 
 > Use production-dev-team for this project. Pick the lightest mode that fits (light edit, slice, read-only audit, harden, or build). Ask one plain-language question at a time, recommend managed services and vetted foundations, offer two options only for consequential choices, follow the approval gates, and never call anything verified without evidence.
 
-If your agent cannot discover installed skills, tell it to read this folder's `SKILL.md` directly. Copy the whole folder: `SKILL.md` alone loses the catalog, caveats, examples and ledger helper.
+If your agent cannot discover installed skills, tell it to read this folder's `SKILL.md` directly.
 
 ## Make it stick across sessions
 A skill file cannot reload itself. Run `scripts/install_snippet.py` (see `references/host-snippets.md`) or paste this into the project's own instruction file (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, or your host's equivalent):
@@ -81,9 +113,6 @@ For software changes in this repo, read and follow <path-to>/production-dev-team
 ```
 
 The installer writes the same text with the real absolute path, so teammates and CI need the skill at that path (or a shared `--skill-path`).
-
-## Install anywhere
-Copy the `production-dev-team` directory into the skill directory your agent supports (for example `~/.claude/skills/` or `~/.codex/skills/`). Back up any existing version first. Start a new session or refresh discovery. No MCP dependency. Python 3 is optional and only needed for the ledger helper (tested on 3.9, 3.12 and 3.14).
 
 ## What it does
 - Chooses a mode first (light, slice, audit, harden, build), so a one-line fix is not treated like a launch audit.
