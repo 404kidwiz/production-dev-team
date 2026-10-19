@@ -39,6 +39,8 @@ Pick the row before reading anything else. Read only the references named for th
 
 Reading budget: Light edits start after this file alone; Slice after one trigger rule plus the ledger command; Audit, Harden and Build read what their row names. Do not read every reference before the first edit.
 
+Audit and Slice start with `python3 scripts/scan_side_effects.py <project>` (read-only, no project code runs): it lists every script, command and test that can message people, move money, delete records or call a service configured in `.env`, with file:line and a one-line risk. Run nothing on that list against live targets.
+
 If a Light change turns out to touch a trust boundary, switch up and say so in one sentence. When uncertainty is only about effort, pick the lighter mode and state the assumption. When it concerns authorization, sensitive data, money, destructive effects or the target environment, inspect first; retain the safer boundary and pause only the risky action if uncertainty remains. If the schedule or scope cannot be done safely (for example "launch today" with regulated data), say so first and propose what can be done now.
 
 ## Helpful execution

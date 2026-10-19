@@ -2,6 +2,10 @@
 
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
+## Unreleased
+- New `scripts/scan_side_effects.py` (danger map): a read-only static scan that lists every script, CLI subcommand, package script and test that can message people, move money or place orders, delete or bulk-overwrite records, or call a service with a URL or key from `.env` or config, with the command to run, file:line hops and a one-line risk. Never runs project code or prints secret values. Python (call graph) first, JS/TS at file level. `SKILL.md` makes it the first step of Audit and Slice.
+- Why: every hazard in the A/B trials was visible in the code but took agents time to find. On the trial 8 and trial 4 apps it lists all six hazardous commands in under a second, and nothing else.
+
 ## 2.8.0 (2026-10-19)
 - New `scripts/safe_run.py`: runs a project's own command in a temporary copy inside the project, with every service URL in `.env` and the environment sent to a local recorder, other database/queue URLs sent to a closed port, secrets replaced with a placeholder and proxy-aware HTTP routed through the recorder. It reports every intercepted call (method, path, body) without printing secret values. Stdlib only; not a network sandbox.
 - Rule 2 names it: an unknown target is treated as live, and the run goes through `scripts/safe_run.py` or is skipped and named.

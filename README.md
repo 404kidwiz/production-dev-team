@@ -92,6 +92,7 @@ Copy the `production-dev-team` directory into the skill directory your agent sup
 - Managed-first, reuse-first decisions with vendor and repository verification.
 - Approval gates for spend, production, destructive changes, external sends and major architecture.
 - Safe run: run the project's own tests and scripts with service URLs sent to a local recorder and secrets replaced, then read what would have been sent.
+- Danger map: a read-only scan that lists every command and test in the project that can message people, move money, delete records or call a live service, before anything runs.
 - A project-local evidence ledger driven by commands (`classify`, `verify`, `slice`, `stale-check`, `report`) so agents do not hand-edit JSON. `verify` hashes the evidence artifact and the source files it depends on; later changes surface as drift. It cannot tell whether an artifact's content is true.
 - Runnable negative-test templates for two-user isolation, payment webhooks, uploads, AI tool authorization and background jobs, plus a per-host installer for the persistence snippet.
 - Honest release reports. Specialist legal, security and accessibility assessments stay with qualified people.
@@ -126,6 +127,15 @@ python3 <skill-dir>/scripts/safe_run.py --config settings.json -- npm test
 It copies the project into a temporary `.safe-run-*` folder inside the project (or under `$SAFE_RUN_DIR`), points every `*_URL` setting in `.env` files and the environment at a local recorder that answers with plausible JSON, sends other database and queue URLs to a closed port, replaces keys, tokens and passwords with a placeholder, and routes proxy-aware HTTP through the recorder. After the command finishes it prints what was redirected and every call that would have been sent (method, path, body), never secret values, then deletes the copy (`--keep` leaves it). The exit code is the command's.
 
 On trial 8's supplier app, `restock.py` would have placed two purchase orders; under safe-run both appear in the report and nothing reached the supplier. It is not a network sandbox: code with a hard-coded host that ignores proxy settings, or that opens raw sockets, can still reach the network (unauthenticated, since secrets are placeholders). Python 3, standard library only.
+
+## Danger map
+See which commands touch real things before running anything:
+
+```sh
+python3 <skill-dir>/scripts/scan_side_effects.py .          # add --json for agents and CI
+```
+
+It reads the code without running it (Python call graph; JS/TS imports two hops deep) and lists every script, CLI subcommand, package script and test file that can reach a call which sends email, SMS or invites, charges money or places orders, deletes or bulk-overwrites records, or calls a service using a URL or key from `.env` or config. Each item shows the command a user would type, the file:line hops down to the call, a one-line risk and any `.env` flag that switches it on. Only key names are printed, never values. On the three trial 8 apps it lists `book.py add` (calendar invites, only when the sync flag is on), `book.py sync` and `remove`, the default `restock.py` run (purchase orders) and `seed.py` (wipes CRM customers); on trial 4 it lists `ops/smoke.py` and `ops/sync_schema.py`. It is a static heuristic: dynamic dispatch, shell scripts and other languages are not followed, so a missing item is not proof a command is safe.
 
 ## Persistence and templates
 - `references/host-snippets.md`: `scripts/install_snippet.py --host cursor|claude|codex|generic --project DIR` adds or updates one marked block in the project's instruction file.
