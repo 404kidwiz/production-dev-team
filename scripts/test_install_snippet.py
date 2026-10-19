@@ -354,6 +354,48 @@ class GuardHook(InstallCase):
         path.write_text(json.dumps({'hooks': {'PreToolUse': [guard, guard]}}))
         self.assertIn('more than one', self.install('claude', '--hook').stderr)
 
+    def copy_skill(self, *parts):
+        copy = Path(self._tmp.name, *parts)
+        (copy / 'scripts').mkdir(parents=True)
+        (copy / 'SKILL.md').write_text('x')
+        (copy / 'scripts/guard_hook.py').write_text((SKILL / 'scripts/guard_hook.py').read_text())
+        return copy
+
+    def run_hook(self, flags=''):
+        [entry] = self.settings()['hooks']['PreToolUse']
+        event = {'tool_name': 'Bash', 'tool_input': {'command': 'git push'}, 'cwd': str(self.project)}
+        return subprocess.run(entry['hooks'][0]['command'] + flags, shell=True, input=json.dumps(event),
+                              capture_output=True, text=True)
+
+    def test_missing_guard_script_fails_open(self):
+        # A plugin update deletes the old versioned folder; python3 on a missing file exits 2, which blocks every command.
+        copy = self.copy_skill('plugin-v1')
+        self.install('claude', '--hook', '--skill-path', str(copy))
+        self.assertEqual(json.loads(self.run_hook(' --deny').stdout)['hookSpecificOutput']['permissionDecision'], 'deny')
+        (copy / 'scripts/guard_hook.py').unlink()
+        ran = self.run_hook()
+        self.assertEqual((ran.returncode, ran.stdout), (0, ''), ran.stderr)
+
+    def test_old_style_entry_is_replaced_and_removed(self):
+        path = self.project / '.claude/settings.local.json'
+        path.parent.mkdir()
+        old = {'matcher': 'Bash', 'hooks': [{'type': 'command', 'timeout': 10,
+                                             'command': f"python3 '{SKILL}/scripts/guard_hook.py'"}]}
+        path.write_text(json.dumps({'hooks': {'PreToolUse': [old]}}))
+        self.install('claude', '--hook')
+        self.assertEqual(self.settings()['hooks']['PreToolUse'], [install_snippet.hook_entry(SKILL)])
+        path.write_text(json.dumps({'hooks': {'PreToolUse': [old]}}))
+        self.install('claude', '--hook', '--remove')
+        self.assertEqual(self.settings(), {})
+
+    def test_plugin_cache_path_gets_a_warning(self):
+        copy = self.copy_skill('.claude', 'plugins', 'cache', 'production-dev-team', 'production-dev-team', '2.9.0')
+        result = self.install('claude', '--hook', '--skill-path', str(copy))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('plugin', result.stderr)
+        self.assertIn('git clone', result.stderr)
+        self.assertNotIn('plugin', self.install('claude', '--hook', '--remove', '--skill-path', str(copy)).stderr)
+
     def test_claude_symlink_out_of_the_project_is_refused(self):
         outside = Path(self._tmp.name) / 'outside'
         outside.mkdir()

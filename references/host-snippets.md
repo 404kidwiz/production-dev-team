@@ -49,7 +49,7 @@ python3 <skill-dir>/scripts/install_snippet.py --host claude --project . --hook
 python3 <skill-dir>/scripts/install_snippet.py --host claude --project . --hook --remove
 ```
 
-It adds one entry and keeps every other setting; a re-run replaces it in place, `--skill-path` changes the path it runs, `--remove` deletes only that entry. It refuses, writing nothing, if the file is not valid JSON, has an unexpected `hooks` shape, or already holds two guard entries. The JSON file is rewritten with two-space indentation. Start a new session to be sure the hook is loaded. To use it in every project, or to share it with a team, add the same entry by hand to `~/.claude/settings.json` or the committed `.claude/settings.json`:
+It adds one entry and keeps every other setting; a re-run replaces it in place (an older `python3 <path>` entry included), `--skill-path` changes the path it runs, `--remove` deletes only that entry. The installed command is `[ -f <path> ] || exit 0; exec python3 <path>`: if the script has gone (a plugin update deletes its old folder), the hook passes everything instead of failing, because Claude Code treats a `PreToolUse` exit 2, which is what `python3` returns for a missing file, as a block. That form needs a POSIX shell (macOS, Linux, Git Bash); where hooks run in `cmd` or PowerShell, use the plain `python3 <path>` form below and re-run the installer whenever the skill moves. Run the installer from a folder that stays put, such as a git clone; it warns when the skill path is inside the Claude Code plugin cache, where the hook would silently stop guarding after the next update. It refuses, writing nothing, if the file is not valid JSON, has an unexpected `hooks` shape, or already holds two guard entries. The JSON file is rewritten with two-space indentation. Start a new session to be sure the hook is loaded. To use it in every project, or to share it with a team, add the same entry by hand to `~/.claude/settings.json` or the committed `.claude/settings.json`:
 
 ```json
 {
@@ -57,7 +57,7 @@ It adds one entry and keeps every other setting; a re-run replaces it in place, 
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "python3 /path/to/production-dev-team/scripts/guard_hook.py", "timeout": 10 }]
+        "hooks": [{ "type": "command", "command": "[ -f /path/to/production-dev-team/scripts/guard_hook.py ] || exit 0; exec python3 /path/to/production-dev-team/scripts/guard_hook.py", "timeout": 10 }]
       }
     ]
   }

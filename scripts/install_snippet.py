@@ -43,6 +43,7 @@ FENCE_CLOSE = re.compile(r'^ {0,3}(`{3,}|~{3,})\s*$')
 DAMAGED = 'found a damaged or duplicated production-dev-team block; fix it by hand, nothing was written'
 HOOK_FILE = Path('.claude') / 'settings.local.json'  # personal, not committed: the hook command holds an absolute path
 HOOK_MARK = '/scripts/guard_hook.py'
+PLUGIN_CACHE = '/.claude/plugins/cache/'
 
 
 def block(skill_path):
@@ -115,7 +116,10 @@ def render(existing, new_block, host, remove):
 
 
 def hook_entry(skill_path):
-    command = 'python3 ' + shlex.quote(str(Path(skill_path) / 'scripts' / 'guard_hook.py'))
+    # Fail open when the script is gone (a plugin update deletes its old folder): python3 on a missing file exits 2,
+    # and Claude Code treats a PreToolUse exit 2 as a block. Needs a POSIX shell; flags appended to the end reach the guard.
+    script = shlex.quote(str(Path(skill_path) / 'scripts' / 'guard_hook.py'))
+    command = f'[ -f {script} ] || exit 0; exec python3 {script}'
     return {'matcher': 'Bash', 'hooks': [{'type': 'command', 'command': command, 'timeout': 10}]}
 
 
@@ -230,6 +234,11 @@ def main(argv=None):
             print(f'unchanged: {target}')
             return 0
         verb = 'removed' if result is None or args.remove else ('created' if existing is None else 'updated')
+        if not args.remove and PLUGIN_CACHE in skill.as_posix() + '/':
+            print(f'note: {skill} is a Claude Code plugin folder, replaced on every plugin update; after one the hook '
+                  'skips silently and the block points nowhere until you re-run this. For a path that stays put: '
+                  'git clone https://github.com/404kidwiz/production-dev-team ~/.agents/skills/production-dev-team '
+                  'and run the installer from there', file=sys.stderr)
         if args.dry_run:
             print(f'would be {verb}: {target}')
             if not args.remove:

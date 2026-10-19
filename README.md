@@ -96,7 +96,7 @@ git clone https://github.com/404kidwiz/production-dev-team.git ~/.agents/skills/
 
 **Check the install:** `python3 ~/.agents/skills/production-dev-team/scripts/doctor.py` (for the Claude Code plugin the folder is `~/.claude/plugins/cache/production-dev-team/production-dev-team/<version>`; `claude plugin list` shows the version). It confirms which agents can find this copy, warns about older copies elsewhere, checks Python and starts `scripts/safe_run.py`, `scripts/scan_side_effects.py` and `scripts/guard_hook.py` with `--help`. Read-only; exit 0 means every check passed.
 
-The plugin's folder changes with every update. If you use `scripts/install_snippet.py` (below), especially `--hook`, run it from the git clone, whose path stays put: a hook pointing at a deleted plugin folder fails every shell command until you re-run the installer.
+The plugin's folder changes with every update. If you use `scripts/install_snippet.py` (below), especially `--hook`, run it from a git clone, whose path stays put; it warns when pointed at the plugin folder. After an update deletes the old folder, an installed hook skips silently (it never blocks your commands) and stops guarding until you re-run the installer.
 
 ## Start
 Give your coding agent this instruction:
