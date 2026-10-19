@@ -2,6 +2,11 @@
 
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
+## 2.8.0 (2026-10-19)
+- New `scripts/safe_run.py`: runs a project's own command in a temporary copy inside the project, with every service URL in `.env` and the environment sent to a local recorder, other database/queue URLs sent to a closed port, secrets replaced with a placeholder and proxy-aware HTTP routed through the recorder. It reports every intercepted call (method, path, body) without printing secret values. Stdlib only; not a network sandbox.
+- Rule 2 names it: an unknown target is treated as live, and the run goes through `scripts/safe_run.py` or is skipped and named.
+- Why: trials showed strong models already avoid visible hazards; the remaining failures (paid calls via the project's own tests, writes to real data, printed keys) need a tool, not more prose. Safe-run lets an agent check end to end without touching live services.
+
 ## 2.7.3 (2026-10-19), first public beta
 - Rule 3: never point a check at the project's real data files (copy to a temporary folder inside the project, confirm the code reads the copy, or use fixtures), and never print `.env` or secret values.
 - Why: on independent tasks, 3 of 18 skill runs wrote test rows into a real data file (then restored it) or printed a key. No-skill runs did neither.

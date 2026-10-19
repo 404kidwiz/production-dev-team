@@ -91,6 +91,7 @@ Copy the `production-dev-team` directory into the skill directory your agent sup
 - A triaged catalog of 181 controls: each has a domain, trigger tags and a linked caveat, so the agent works the relevant subset and sweeps the rest only at checkpoints.
 - Managed-first, reuse-first decisions with vendor and repository verification.
 - Approval gates for spend, production, destructive changes, external sends and major architecture.
+- Safe run: run the project's own tests and scripts with service URLs sent to a local recorder and secrets replaced, then read what would have been sent.
 - A project-local evidence ledger driven by commands (`classify`, `verify`, `slice`, `stale-check`, `report`) so agents do not hand-edit JSON. `verify` hashes the evidence artifact and the source files it depends on; later changes surface as drift. It cannot tell whether an artifact's content is true.
 - Runnable negative-test templates for two-user isolation, payment webhooks, uploads, AI tool authorization and background jobs, plus a per-host installer for the persistence snippet.
 - Honest release reports. Specialist legal, security and accessibility assessments stay with qualified people.
@@ -113,6 +114,18 @@ python3 -m unittest discover -s <skill-dir>/scripts -p 'test_*.py' -v
 ```
 
 Exit codes: 0 valid and no unverified required-now control (exit 0 is not a green light); 1 structural errors; 2 refused or could not run; 3 required-now controls unverified or evidence drifted (normal mid-build). `--release` also requires declared triggers, every non-lane control classified, hashed local artifacts, no drift, and `accepted_by` on excluded controls that match the declared triggers. Validation checks ledger consistency only; it never inspects the app, proves evidence is genuine, or certifies anything.
+
+## Safe run
+Run a project's real tests or scripts without touching its live services or real data files:
+
+```sh
+python3 <skill-dir>/scripts/safe_run.py -- python3 -m pytest
+python3 <skill-dir>/scripts/safe_run.py --config settings.json -- npm test
+```
+
+It copies the project into a temporary `.safe-run-*` folder inside the project (or under `$SAFE_RUN_DIR`), points every `*_URL` setting in `.env` files and the environment at a local recorder that answers with plausible JSON, sends other database and queue URLs to a closed port, replaces keys, tokens and passwords with a placeholder, and routes proxy-aware HTTP through the recorder. After the command finishes it prints what was redirected and every call that would have been sent (method, path, body), never secret values, then deletes the copy (`--keep` leaves it). The exit code is the command's.
+
+On trial 8's supplier app, `restock.py` would have placed two purchase orders; under safe-run both appear in the report and nothing reached the supplier. It is not a network sandbox: code with a hard-coded host that ignores proxy settings, or that opens raw sockets, can still reach the network (unauthenticated, since secrets are placeholders). Python 3, standard library only.
 
 ## Persistence and templates
 - `references/host-snippets.md`: `scripts/install_snippet.py --host cursor|claude|codex|generic --project DIR` adds or updates one marked block in the project's instruction file.
