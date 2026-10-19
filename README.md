@@ -12,6 +12,8 @@
 
 A portable agent skill for beginners building new apps or auditing and hardening existing ones. Version in `VERSION`.
 
+> **Public beta.** The rules have been tested in small A/B trials (summarized below), not in large real-world use. It makes agents more careful; it does not make an app secure or compliant. Please [report anything the agent does wrong](#report-a-problem).
+
 Coding agents are fast and confident, and they will happily tell you a login system is "done" when nobody checked that user A cannot read user B's data. This skill gives your agent engineering judgment: it asks the right questions, picks vetted foundations, stops before risky actions, and refuses to call anything *verified* without a recorded check.
 
 ## How it works
@@ -105,6 +107,9 @@ Exit codes: 0 valid and no unverified required-now control (exit 0 is not a gree
 ## Persistence and templates
 - `references/host-snippets.md`: `scripts/install_snippet.py --host cursor|claude|codex|generic --project DIR` adds or updates one marked block in the project's instruction file.
 - `references/test-templates.md`: `templates/` holds isolation, payment-webhook, upload, AI tool and job tests with an adapter you fill in. An unconfigured adapter errors; it never passes.
+
+## Report a problem
+If an agent using this skill does something risky, wrong or misleading, please open an issue with the "The agent did something it shouldn't have" template. Include the skill version, host and model, and the agent's own report. Remove secrets and personal data first. Each report becomes a test case for the next release. Release notes are in `CHANGELOG.md`.
 
 ## Provenance and license
 The catalog's 160 `POST-` rows follow the order of the checklist in Mark Ajzenstadt's public post (https://x.com/mardehaym/status/2110705357492203564) and were re-expressed in original wording; the post's text is not bundled. The 21 `EXT-` rows are supplemental engineering controls; nine of them, plus nine `POST-` rows, carry `refs` to the OWASP ASVS 5.0 chapter or requirement they follow (authorization, file handling, sessions, validation, encoding). The catalog is a prompt for judgment, not a compliance standard, and `references/interpretation.md` qualifies context-dependent claims. This is not legal advice. If you are the author of the source post and want the attribution changed or the rows removed, please open an issue.
