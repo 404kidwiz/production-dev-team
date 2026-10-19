@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import unittest
 
+import guard_hook
 import install_snippet
 import ledger
 
@@ -59,12 +60,14 @@ class DocsMatchTool(unittest.TestCase):
 
     def test_installer_flags_in_docs_exist_and_all_installer_flags_are_documented(self):
         doc = (ROOT / 'references' / 'host-snippets.md').read_text()
-        source = Path(install_snippet.__file__).read_text()
+        source = Path(install_snippet.__file__).read_text() + Path(guard_hook.__file__).read_text()
         mentioned = set(re.findall(r'(?<![\w-])(--[a-z][a-z-]*)', doc))
         for flag in mentioned:
-            self.assertIn(f"'{flag}'", source, f'host-snippets.md mentions {flag}, which the installer does not accept')
+            self.assertIn(f"'{flag}'", source, f'host-snippets.md mentions {flag}, which neither the installer nor the guard accepts')
         for flag in re.findall(r"add_argument\('(--[a-z-]+)'", source):
-            self.assertIn(flag, mentioned, f'installer flag {flag} is not documented in host-snippets.md')
+            self.assertIn(flag, mentioned, f'flag {flag} is not documented in host-snippets.md')
+        for check in guard_hook.CHECKS:
+            self.assertIn(f'| `{check}` |', doc, f'guard check {check} has no row in host-snippets.md')
         for host in re.findall(r'--host (\w+)', doc):
             self.assertIn(host, list(install_snippet.HOSTS) + ['generic'])
 
@@ -76,7 +79,7 @@ class DocsMatchTool(unittest.TestCase):
 
     def test_every_snake_case_token_in_the_docs_exists_in_the_tool(self):
         source = (Path(ledger.__file__).read_text() + Path(install_snippet.__file__).read_text()
-                  + ''.join(p.read_text() for p in sorted((ROOT / 'templates').glob('*.py'))))
+                  + Path(guard_hook.__file__).read_text() + ''.join(p.read_text() for p in sorted((ROOT / 'templates').glob('*.py'))))
         checked = set()
         for doc in DOCS:
             for token in re.findall(r'`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`', doc.read_text()):

@@ -1,4 +1,5 @@
 """Tests for install_snippet.py. Everything happens in temp directories."""
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -281,6 +282,85 @@ Inline: {START} and {END} are the marker names.
         real = self.install('claude')
         self.assertIn('absolute path', real.stderr)
         self.assertNotIn('absolute path', self.install('claude', '--remove').stderr)
+
+
+class GuardHook(InstallCase):
+    def settings(self):
+        return json.loads((self.project / '.claude/settings.local.json').read_text())
+
+    def test_hook_is_added_to_local_settings_and_runs_the_guard(self):
+        result = self.install('claude', '--hook')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.files(), ['.claude/settings.local.json'])
+        [entry] = self.settings()['hooks']['PreToolUse']
+        self.assertEqual(entry['matcher'], 'Bash')
+        [handler] = entry['hooks']
+        self.assertEqual(handler['type'], 'command')
+        self.assertIn(f'{SKILL}/scripts/guard_hook.py', handler['command'])
+        event = {'tool_name': 'Bash', 'tool_input': {'command': 'git push'}, 'cwd': str(self.project)}
+        ran = subprocess.run(handler['command'], shell=True, input=json.dumps(event), capture_output=True, text=True)
+        self.assertEqual(json.loads(ran.stdout)['hookSpecificOutput']['permissionDecision'], 'ask')
+
+    def test_existing_settings_survive_and_rerun_is_unchanged(self):
+        path = self.project / '.claude/settings.local.json'
+        path.parent.mkdir()
+        mine = {'permissions': {'allow': ['Bash(npm test)']},
+                'hooks': {'PreToolUse': [{'matcher': 'Edit', 'hooks': [{'type': 'command', 'command': 'lint.sh'}]}],
+                          'Stop': [{'hooks': [{'type': 'command', 'command': 'say done'}]}]}}
+        path.write_text(json.dumps(mine))
+        self.install('claude', '--hook')
+        data = self.settings()
+        self.assertEqual(data['permissions'], mine['permissions'])
+        self.assertEqual(data['hooks']['Stop'], mine['hooks']['Stop'])
+        self.assertEqual(data['hooks']['PreToolUse'][0], mine['hooks']['PreToolUse'][0])
+        self.assertEqual(len(data['hooks']['PreToolUse']), 2)
+        before = path.read_bytes()
+        self.assertIn('unchanged', self.install('claude', '--hook').stdout)
+        self.assertEqual(path.read_bytes(), before)
+        self.install('claude', '--hook', '--remove')
+        self.assertEqual(self.settings(), mine)
+
+    def test_changed_skill_path_replaces_the_entry_in_place(self):
+        self.install('claude', '--hook')
+        other = Path(self._tmp.name) / 'elsewhere'
+        (other / 'scripts').mkdir(parents=True)
+        (other / 'SKILL.md').write_text('x')
+        (other / 'scripts/guard_hook.py').write_text('')
+        self.install('claude', '--hook', '--skill-path', str(other))
+        [entry] = self.settings()['hooks']['PreToolUse']
+        self.assertIn(str(other.resolve()), entry['hooks'][0]['command'])
+
+    def test_dry_run_and_remove_when_absent(self):
+        dry = self.install('claude', '--hook', '--dry-run')
+        self.assertIn('would be created', dry.stdout)
+        self.assertIn('guard_hook.py', dry.stdout)
+        self.assertEqual(self.files(), [])
+        self.assertIn('unchanged', self.install('claude', '--hook', '--remove').stdout)
+        self.assertEqual(self.files(), [])
+
+    def test_refusals_leave_files_untouched(self):
+        for host in ('codex', 'cursor', 'generic'):
+            result = self.install(host, '--hook')
+            self.assertEqual(result.returncode, 2, host)
+            self.assertIn('Claude Code guard only', result.stderr)
+        path = self.project / '.claude/settings.local.json'
+        path.parent.mkdir()
+        for text in ('{broken', '[]', '{"hooks": []}', '{"hooks": {"PreToolUse": {}}}'):
+            path.write_text(text)
+            result = self.install('claude', '--hook')
+            self.assertEqual(result.returncode, 2, text)
+            self.assertEqual(path.read_text(), text)
+        guard = install_snippet.hook_entry(SKILL)
+        path.write_text(json.dumps({'hooks': {'PreToolUse': [guard, guard]}}))
+        self.assertIn('more than one', self.install('claude', '--hook').stderr)
+
+    def test_claude_symlink_out_of_the_project_is_refused(self):
+        outside = Path(self._tmp.name) / 'outside'
+        outside.mkdir()
+        os.symlink(outside, self.project / '.claude')
+        result = self.install('claude', '--hook')
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(list(outside.iterdir()), [])
 
 
 if __name__ == '__main__':

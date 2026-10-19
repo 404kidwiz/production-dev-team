@@ -6,6 +6,10 @@ This writes one marked block and nothing else: re-running replaces the block, ne
 and text outside the markers is left byte-for-byte alone (line endings included).
 
   install_snippet.py --host cursor|claude|codex|generic --project DIR [--skill-path DIR] [--dry-run] [--remove]
+  install_snippet.py --host claude --project DIR --hook [--dry-run] [--remove]
+
+--hook instead adds the optional guard (scripts/guard_hook.py) as a Claude Code PreToolUse hook in the project's
+.claude/settings.local.json; other settings are kept, and re-running replaces the entry, never duplicates it.
 
 The block contains an absolute path to the skill folder. Teammates and CI need the skill at the same path,
 or re-run this with a --skill-path they share.
@@ -13,9 +17,11 @@ or re-run this with a --skill-path they share.
 Exit codes: 0 done (or nothing to do), 2 refused or could not run.
 """
 import argparse
+import json
 import os
 from pathlib import Path
 import re
+import shlex
 import sys
 import tempfile
 
@@ -35,6 +41,8 @@ CURSOR_FRONTMATTER = (
 FENCE_OPEN = re.compile(r'^ {0,3}(`{3,}|~{3,})')
 FENCE_CLOSE = re.compile(r'^ {0,3}(`{3,}|~{3,})\s*$')
 DAMAGED = 'found a damaged or duplicated production-dev-team block; fix it by hand, nothing was written'
+HOOK_FILE = Path('.claude') / 'settings.local.json'  # personal, not committed: the hook command holds an absolute path
+HOOK_MARK = '/scripts/guard_hook.py'
 
 
 def block(skill_path):
@@ -106,6 +114,47 @@ def render(existing, new_block, host, remove):
     return existing + separator + new_block
 
 
+def hook_entry(skill_path):
+    command = 'python3 ' + shlex.quote(str(Path(skill_path) / 'scripts' / 'guard_hook.py'))
+    return {'matcher': 'Bash', 'hooks': [{'type': 'command', 'command': command, 'timeout': 10}]}
+
+
+def is_guard(entry):
+    return isinstance(entry, dict) and any(isinstance(h, dict) and HOOK_MARK in str(h.get('command', ''))
+                                           for h in entry.get('hooks') or [])
+
+
+def render_hook(existing, entry, remove):
+    """Return the new settings text with the guard entry added, replaced or removed; the same text when unchanged."""
+    if existing is None and remove:
+        return None
+    try:
+        data = json.loads(existing) if existing and existing.strip() else {}
+    except ValueError:
+        raise ValueError('the settings file is not valid JSON; fix it by hand, nothing was written') from None
+    hooks = data.get('hooks', {}) if isinstance(data, dict) else None
+    pre = hooks.get('PreToolUse', []) if isinstance(hooks, dict) else None
+    if not isinstance(pre, list):
+        raise ValueError('the settings file does not have the expected {"hooks": {"PreToolUse": [...]}} shape; nothing was written')
+    ours = [i for i, e in enumerate(pre) if is_guard(e)]
+    if len(ours) > 1:
+        raise ValueError('found more than one guard hook entry; fix it by hand, nothing was written')
+    if remove:
+        new_pre = [e for e in pre if not is_guard(e)]
+    else:
+        at = ours[0] if ours else len(pre)  # replace in place so a re-run never moves or duplicates it
+        new_pre = pre[:at] + [entry] + pre[at + 1:]
+    if new_pre == pre and existing is not None:
+        return existing
+    hooks = dict(hooks, PreToolUse=new_pre)
+    if not new_pre:
+        del hooks['PreToolUse']
+    data = dict(data, hooks=hooks)
+    if not hooks:
+        del data['hooks']
+    return json.dumps(data, indent=2) + '\n'
+
+
 def read_text(path):
     with open(path, encoding='utf-8', newline='') as handle:  # newline='' keeps CRLF and CR exactly as they are
         return handle.read()
@@ -143,6 +192,8 @@ def main(argv=None):
     parser.add_argument('--skill-path', help='where the skill folder lives (default: this folder)')
     parser.add_argument('--dry-run', action='store_true', help='report what would change and show the block; write nothing')
     parser.add_argument('--remove', action='store_true', help='remove the block instead of adding it')
+    parser.add_argument('--hook', action='store_true',
+                        help='add (or with --remove, remove) the guard hook in .claude/settings.local.json; claude only')
     args = parser.parse_args(argv)
     try:
         project = Path(args.project).expanduser().resolve()
@@ -153,17 +204,28 @@ def main(argv=None):
             raise ValueError('skill path contains control characters')
         if not (skill / 'SKILL.md').is_file():
             raise ValueError(f'no SKILL.md in skill path: {skill}')
-        new_block = block(skill)
+        if args.hook:
+            if args.host != 'claude':
+                raise ValueError('--hook installs the Claude Code guard only; for Codex and Cursor see references/host-snippets.md')
+            if not (skill / 'scripts' / 'guard_hook.py').is_file():
+                raise ValueError(f'no scripts/guard_hook.py in skill path: {skill}')
+            entry = hook_entry(skill)
+            new_block = json.dumps(entry, indent=2) + '\n'
+        else:
+            new_block = block(skill)
         if args.host == 'generic':
             print(new_block, end='')
             return 0
-        target = project / HOSTS[args.host]
+        target = project / (HOOK_FILE if args.hook else HOSTS[args.host])
         if not inside(project, target):
             raise ValueError(f'{target} resolves outside the project (a symlink?); refusing to write there')
         if os.path.lexists(target) and not target.is_file():
             raise ValueError(f'target is not a regular file: {target}')
         existing = read_text(target) if target.exists() else None
-        result = render(existing, new_block, args.host, args.remove)
+        if args.hook:
+            result = render_hook(existing, entry, args.remove)
+        else:
+            result = render(existing, new_block, args.host, args.remove)
         if result == existing:
             print(f'unchanged: {target}')
             return 0
@@ -178,7 +240,9 @@ def main(argv=None):
         else:
             write_atomic(target, result)
         print(f'{verb}: {target}')
-        if not args.remove:
+        if args.hook:
+            print('note: start a new Claude Code session to be sure the hook is loaded', file=sys.stderr)
+        elif not args.remove:
             print(f'note: the block contains the absolute path {skill}; teammates and CI need the skill there '
                   'or a re-run with --skill-path', file=sys.stderr)
         return 0

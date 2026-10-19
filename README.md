@@ -139,6 +139,7 @@ It reads the code without running it (Python call graph; JS/TS imports two hops 
 
 ## Persistence and templates
 - `references/host-snippets.md`: `scripts/install_snippet.py --host cursor|claude|codex|generic --project DIR` adds or updates one marked block in the project's instruction file.
+- Optional guard hook: `scripts/install_snippet.py --host claude --project DIR --hook` adds `scripts/guard_hook.py` as a Claude Code `PreToolUse` hook. It asks before a shell command deletes data outside temp and build folders, pushes or deploys, runs a migration, or runs project code while `.env` sets a URL or key; everything else passes silently. Opt-in; see `references/host-snippets.md` for Codex (`--deny`) and Cursor.
 - `references/test-templates.md`: `templates/` holds isolation, payment-webhook, upload, AI tool and job tests with an adapter you fill in. An unconfigured adapter errors; it never passes.
 
 ## Report a problem
