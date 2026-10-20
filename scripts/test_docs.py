@@ -132,7 +132,12 @@ class DocsMatchTool(unittest.TestCase):
         self.assertNotIn(': ', fields['description'])
         self.assertNotIn(' #', fields['description'])
         self.assertFalse(fields['description'].startswith(('"', "'", '[', '{', '&', '*', '!', '|', '>', '%', '@', '`')))
-        self.assertEqual(ROOT.name, fields['name'], 'folder name must match the skill name when installed')
+        # A copied folder is named after the skill. The Claude Code plugin cache uses
+        # .../<skill-name>/<VERSION>/ instead, and discovery there goes through plugin.json.
+        version = (ROOT / 'VERSION').read_text().strip()
+        plugin_cache = ROOT.name == version and ROOT.parent.name == fields['name']
+        self.assertTrue(ROOT.name == fields['name'] or plugin_cache,
+                        f'folder name must match the skill name when installed (got {ROOT.name!r})')
 
     def test_version_file_is_semver_and_catalog_declares_a_version(self):
         self.assertRegex((ROOT / 'VERSION').read_text().strip(), r'^\d+\.\d+\.\d+$')

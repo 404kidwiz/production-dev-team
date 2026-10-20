@@ -2,6 +2,9 @@
 
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
+## 2.10.2 (2026-10-20)
+- The packaging test that checks the folder name now also accepts the Claude Code plugin-cache layout (`.../production-dev-team/<version>/`). Before this, running the test suite inside a plugin install failed with one error, although the install itself worked. Found by installing from GitHub into a throwaway config.
+
 ## 2.10.1 (2026-10-19)
 - `scripts/doctor.py` warns when this copy is a real folder inside Cursor's built-in skills folder (`~/.cursor/skills-cursor`, or a shared skills folder that path is symlinked to). Cursor deletes folders it did not create there about 72 hours after first seeing them; on one test machine that removed a git clone of this skill. A symlinked install is not affected. When Cursor has already recorded the copy, the warning gives the time it can be deleted.
 - The installer's plugin-folder warning now also covers a Claude Code config folder set with `CLAUDE_CONFIG_DIR`, not only `~/.claude`.
