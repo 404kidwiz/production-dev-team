@@ -2,9 +2,10 @@
 
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
-## Unreleased
+## 2.10.1 (2026-10-19)
 - `scripts/doctor.py` warns when this copy is a real folder inside Cursor's built-in skills folder (`~/.cursor/skills-cursor`, or a shared skills folder that path is symlinked to). Cursor deletes folders it did not create there about 72 hours after first seeing them; on one test machine that removed a git clone of this skill. A symlinked install is not affected. When Cursor has already recorded the copy, the warning gives the time it can be deleted.
 - The installer's plugin-folder warning now also covers a Claude Code config folder set with `CLAUDE_CONFIG_DIR`, not only `~/.claude`.
+- Docs: the Codex guard-hook example in `references/host-snippets.md` uses the same fail-open command (Codex also treats a `PreToolUse` exit 2 as a block), and the file records live runs of the guard on Claude Code 2.1.289 and Codex CLI 0.154.0.
 
 ## 2.10.0 (2026-10-19)
 - One-command install. The repository is now a Claude Code plugin marketplace (`.claude-plugin/marketplace.json` and `plugin.json`, version pinned to `VERSION`): `claude plugin marketplace add 404kidwiz/production-dev-team`, then `claude plugin install production-dev-team@production-dev-team`. Codex and Cursor install with one `git clone` into `~/.agents/skills/production-dev-team`, which both scan. The README's new Install section covers update and uninstall for each, and replaces the old `~/.codex/skills` advice (current Codex reads `~/.agents/skills`).

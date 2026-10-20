@@ -1,7 +1,7 @@
 {
   "name": "production-dev-team",
   "displayName": "Production Dev Team",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "Engineering guardrail for coding agents shipping real software: picks the lightest mode, gates live and destructive actions, leaves tests behind and never calls anything verified without a recorded check.",
   "author": {
     "name": "404kidwiz",
