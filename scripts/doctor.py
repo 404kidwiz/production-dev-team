@@ -9,11 +9,14 @@ Checks, in order:
   - An agent can discover this copy: a Claude Code plugin install, or a skills folder that Claude Code,
     Codex or Cursor scans (user-level or in the current project), directly or through a symlink.
     Other copies with a different version are listed, since a host may load the wrong one.
+  - This copy is not a real folder inside Cursor's built-in skills folder (~/.cursor/skills-cursor, or wherever it
+    points), which Cursor clears of folders it did not create about 72 hours after first seeing them.
   - scripts/safe_run.py, scripts/scan_side_effects.py and scripts/guard_hook.py start with --help.
 
 Read-only: it never writes files and never runs project code.
 Exit codes: 0 every check passed (warnings allowed), 1 a check failed.
 """
+import datetime
 import json
 import os
 from pathlib import Path
@@ -123,6 +126,34 @@ def check_discovery(root, home, cwd, config_dir):
     return results
 
 
+def check_cursor_managed(root, home):
+    """Warn when this copy is a real folder in the folder Cursor keeps its built-in skills in.
+
+    Cursor's skill sync records every real folder it did not create in ~/.cursor/skills-cursor (symlinks are skipped)
+    and deletes it about 72 hours later. If that path is a symlink to a shared skills folder, a clone there is lost.
+    """
+    managed = home / '.cursor' / 'skills-cursor'
+    if not managed.is_dir():
+        return []
+    here = root.resolve()
+    entry = managed.resolve() / here.name
+    if entry.is_symlink() or not entry.is_dir() or entry.resolve() != here:
+        return []
+    if managed.is_symlink():
+        fix = f'Replace the symlink {managed} with a real folder, or install this skill as a symlink'
+    else:
+        fix = 'Move this copy out of that folder, or install it there as a symlink'
+    when = ''
+    try:
+        seen = json.loads((managed / '.sync-manifest.json').read_text())['skills'][here.name]['lastSyncedAt']
+        due = datetime.datetime.fromtimestamp(seen / 1000 + 72 * 3600, datetime.timezone.utc)
+        when = f' It was recorded already; it can be deleted after {due:%Y-%m-%d %H:%M} UTC.'
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return [('warn', f'{root} is a real folder in Cursor\'s built-in skills folder {managed}, which Cursor clears of '
+                     f'folders it did not create about 72 hours after first seeing them.{when} {fix}.')]
+
+
 def check_helpers(root, timeout=30):
     results = []
     for name in HELPERS:
@@ -148,6 +179,7 @@ def run(root=ROOT, home=None, cwd=None, config_dir=None):
     results = [check_python()]
     results += check_skill(root)
     results += check_discovery(root, home, cwd, config_dir)
+    results += check_cursor_managed(root, home)
     results += check_helpers(root)
     return results
 

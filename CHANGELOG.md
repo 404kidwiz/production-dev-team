@@ -3,6 +3,7 @@
 Plain-language notes for each release. "Trial" numbers refer to the small A/B tests described in the README; they are examples, not a benchmark.
 
 ## Unreleased
+- `scripts/doctor.py` warns when this copy is a real folder inside Cursor's built-in skills folder (`~/.cursor/skills-cursor`, or a shared skills folder that path is symlinked to). Cursor deletes folders it did not create there about 72 hours after first seeing them; on one test machine that removed a git clone of this skill. A symlinked install is not affected. When Cursor has already recorded the copy, the warning gives the time it can be deleted.
 - The installer's plugin-folder warning now also covers a Claude Code config folder set with `CLAUDE_CONFIG_DIR`, not only `~/.claude`.
 
 ## 2.10.0 (2026-10-19)

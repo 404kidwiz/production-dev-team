@@ -89,6 +89,68 @@ class Discovery(TempCase):
         self.assertEqual(self.statuses(self.discover(root)), ['ok'])
 
 
+class CursorManagedFolder(TempCase):
+    """Cursor deletes real folders it did not create in ~/.cursor/skills-cursor about 72 hours after first seeing them."""
+
+    def managed(self, target=None):
+        (self.home / '.cursor').mkdir()
+        link = self.home / '.cursor' / 'skills-cursor'
+        if target is None:
+            link.mkdir()
+        else:
+            target.mkdir(parents=True, exist_ok=True)
+            link.symlink_to(target)
+        return link
+
+    def test_copy_in_a_shared_folder_that_skills_cursor_points_at_warns(self):
+        shared = self.home / '.skills'
+        self.managed(shared)
+        root = self.fake_skill(shared / 'production-dev-team')
+        [(status, message)] = doctor.check_cursor_managed(root, self.home)
+        self.assertEqual(status, 'warn')
+        self.assertIn('skills-cursor', message)
+        self.assertIn('real folder', message)
+
+    def test_copy_placed_inside_cursors_own_folder_warns(self):
+        root = self.fake_skill(self.managed() / 'production-dev-team')
+        [(status, message)] = doctor.check_cursor_managed(root, self.home)
+        self.assertEqual(status, 'warn')
+        self.assertIn('Move this copy', message)
+
+    def test_recorded_copy_names_the_date_it_can_be_deleted(self):
+        shared = self.home / '.skills'
+        self.managed(shared)
+        root = self.fake_skill(shared / 'production-dev-team')
+        seen = 1792178295461  # 2026-10-16, as Cursor records it (ms)
+        (shared / '.sync-manifest.json').write_text(json.dumps(
+            {'version': 1, 'skills': {'production-dev-team': {'lastSyncedAt': seen}}}))
+        [(_, message)] = doctor.check_cursor_managed(root, self.home)
+        self.assertIn('2026-10-19', message)
+
+    def test_safe_layouts_are_quiet(self):
+        self.assertEqual(doctor.check_cursor_managed(self.fake_skill(self.home / 'a' / 'production-dev-team'),
+                                                     self.home), [])   # no Cursor folder at all
+        shared = self.home / '.skills'
+        self.managed()   # a real folder of Cursor's own
+        root = self.fake_skill(shared / 'production-dev-team')
+        self.assertEqual(doctor.check_cursor_managed(root, self.home), [])
+
+    def test_symlinked_install_is_quiet_because_cursor_skips_symlinks(self):
+        shared = self.home / '.skills'
+        self.managed(shared)
+        root = self.fake_skill(self.tmp / 'checkout' / 'production-dev-team')
+        (shared / 'production-dev-team').symlink_to(root)
+        self.assertEqual(doctor.check_cursor_managed(shared / 'production-dev-team', self.home), [])
+        self.assertEqual(doctor.check_cursor_managed(root, self.home), [])
+
+    def test_run_includes_the_warning(self):
+        shared = self.home / '.skills'
+        self.managed(shared)
+        root = self.fake_skill(shared / 'production-dev-team')
+        messages = [m for _, m in doctor.run(root, home=self.home, cwd=self.home, config_dir=self.home / '.claude')]
+        self.assertTrue(any('skills-cursor' in m for m in messages))
+
+
 class SkillAndPython(TempCase):
     def test_missing_skill_md_fails(self):
         root = self.fake_skill(self.tmp / 'production-dev-team')
